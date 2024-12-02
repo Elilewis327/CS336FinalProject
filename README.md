@@ -1,20 +1,15 @@
-## Schema
-The final schema should be something like this:
+# Welcome to the CS336FinalProject wiki!
+
+## Pages
+
+[Project Link 🔗]()
+
+[Running The Project Locally 🚀]()
+
+[Components]()
+
+[Database Schema 🗒️](https://github.com/Elilewis327/CS336FinalProject/wiki/Database-Schema)
+
+[Responsibilities]()
 
 
-# Collections
-
-## Users
-**Document:** Auto Generate  
-- `creation_time`: `timestamp`  
-- `username`: `string`  
-- `auth_info`: `idk`  
-
-## FinalProjectChats
-**Document:** Auto Generate  
-- `chat_room_name`: `string`  
-- `chats`: `map`  
-  - `timestamp`: `timestamp`  
-  - `sender`: `reference -> Users`  
-  - `message`: `string`  
-  - many chats per document
