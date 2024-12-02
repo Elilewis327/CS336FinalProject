@@ -1,0 +1,4 @@
+.messageViewer {
+  height: 80vh;
+  overflow: scroll;
+}

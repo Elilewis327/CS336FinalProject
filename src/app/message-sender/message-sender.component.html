@@ -1,0 +1,34 @@
+<div class="container messageSender">
+  <div class="input-group" stlye="margin: 5px;">
+    <input
+      type="text"
+      [(ngModel)]="message"
+      (keyup.enter)="send()"
+      class="form-control"
+      placeholder="Chat Message"
+    />
+    <button (click)="send()" class="btn btn-outline-primary" type="button">
+      Send
+    </button>
+  </div>
+  <div class="input-group">
+    <span class="input-group-text">Name and Color</span>
+    <input
+      [(ngModel)]="settings.userName"
+      type="text"
+      aria-label="Name"
+      placeholder="Name"
+      class="form-control"
+    />
+    <input
+      [(ngModel)]="settings.color"
+      type="text"
+      aria-label="Color"
+      placeholder="Color"
+      class="form-control"
+    />
+    <button (click)="saveSettings()" class="btn btn-outline-secondary" type="button">
+      Save
+    </button>
+  </div>
+</div>
