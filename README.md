@@ -11,6 +11,6 @@
 
 [Database Schema 🗒️](https://github.com/Elilewis327/CS336FinalProject/wiki/Database-Schema)
 
-[Responsibilities 🙋🙋‍♂️](https://github.com/Elilewis327/CS336FinalProject/wiki/Responsibilities)
+[Responsibilities 🙋🙋‍♂️](https://github.com/Elilewis327/CS336FinalProject/wiki/Responsibilities-and-Implementation)
 
 
