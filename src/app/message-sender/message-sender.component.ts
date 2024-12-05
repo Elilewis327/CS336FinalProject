@@ -12,24 +12,11 @@ import { FormsModule } from '@angular/forms';
 })
 export class MessageSenderComponent {
   DbService: DbService = inject(DbService);
-  settings: {color: string, userName: string} = {color: 'black', userName: 'Anonymous'};
   message: string = '';
-
-  constructor (){
-    if (localStorage.getItem('settings')  !== null){
-      this.settings = JSON.parse(localStorage.getItem('settings')!);
-    } 
-  }
-
-  saveSettings(){
-    localStorage.setItem('settings', JSON.stringify(this.settings));
-  }
 
   send() {
     const message = {
       timestamp: serverTimestamp(),
-      color: this.settings.color,
-      userName: this.settings.userName,
       message: this.message
     };
 

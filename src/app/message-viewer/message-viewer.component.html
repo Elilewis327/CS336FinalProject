@@ -1,5 +1,3 @@
 <div class="container messageViewer">
-  @for ( chat of this.DbService.chats$ | async; track chat;){
-    <app-message [data]="chat"/>
-  }
+  {{this.id()}}
 </div>
