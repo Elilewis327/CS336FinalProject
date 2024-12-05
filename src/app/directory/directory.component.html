@@ -1,1 +1,5 @@
-<p>directory works!</p>
+<div class="directory">
+  @for ( room of this.DbService.Rooms$ | async; track room;){
+    <app-room [data]="room" />
+  }
+</div>

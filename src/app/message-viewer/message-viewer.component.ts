@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MessageComponent } from '../message/message.component';
 import { DbService } from '../db-service/db-service.service';
@@ -13,6 +13,7 @@ import { Chat } from '../db-service/db-service.service';
 })
 export class MessageViewerComponent {
   DbService: DbService = inject(DbService);
+  id = input<string>('');
 
   constructor() {
   }
