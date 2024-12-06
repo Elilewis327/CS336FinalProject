@@ -1,12 +1,22 @@
 import { inject, Injectable } from '@angular/core';
-import { Timestamp } from '@angular/fire/firestore';
 import {
   Firestore,
+  collection,
+  collectionData,
   doc,
   getDoc,
   addDoc,
+  setDoc,
   DocumentReference,
+  Timestamp,
 } from '@angular/fire/firestore';
+import {
+  Auth,
+  signInWithPopup,
+  user,
+  OAuthProvider,
+  User as FirebaseUser,
+} from "@angular/fire/auth";
 import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
@@ -14,43 +24,53 @@ import { BehaviorSubject, Observable } from 'rxjs';
 })
 export class DbService {
   private firestore: Firestore = inject(Firestore);
-  public user: User | undefined;
 
   private roomSubject = new BehaviorSubject<Room[]>([]);
   public Rooms$: Observable<Room[]> = this.roomSubject.asObservable();
 
-  constructor() {
-    this.init(); // this is so dumb, but idk another way
-  }
+  private fireAuth: Auth = inject(Auth);
+  private user$: Observable<FirebaseUser | null> = user(this.fireAuth);
+  public user: User | null = null;
 
-  async init() {
-    try {
-      await this.getUser();
-      this.getRooms();
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  }
+  public async userLogin(providerName: string = "google.com"): Promise<void> {
+    const provider = new OAuthProvider(providerName);
+    const creds = await signInWithPopup(this.fireAuth, provider);
+    // user$ is now set (same as creds)
 
-  async getUser() {
-    // Fetch the current user's document
-    // TODO: change to current user
-    const username = 'eli';
-    const userDoc = await getDoc(doc(this.firestore, 'users', username));
-
+    const userDoc = await getDoc(doc(this.firestore, "users", creds.user.uid));
     if (!userDoc.exists()) {
-      throw new Error('Document path /users/' + username + ' is invalid.');
+      // create user if they aren't in the db
+      try {
+        const userValues: User = {
+          email: creds.user.email!,
+          photoURL: creds.user.photoURL!,
+          username: creds.user.email!.split("@")[0], // default to email
+          rooms: [],
+        };
+        await setDoc(doc(this.firestore, "users", creds.user.uid), userValues);
+      } catch (error) {
+        console.error(error); // lazy
+      }
     }
+  }
 
-    this.user = userDoc.data() as User;
+  constructor() {
+    this.user$.subscribe(async firebaseUser => {
+      if (firebaseUser) {
+        const docData = await getDoc(doc(this.firestore, "users", firebaseUser.uid));
+        if (docData.exists())
+          this.user = docData.data() as User;
+        this.getRooms();
+      }
+    });
   }
 
   async getRooms() {
     if (!this.user)
-      throw new Error('User undefined when trying to fetch rooms');
+      throw new Error('user undefined when trying to fetch rooms');
 
     if (!this.user.rooms || this.user.rooms.length <= 0) {
-      console.warn('No rooms found for the user!');
+      console.warn('no rooms found for the user!');
       return;
     }
 
@@ -85,10 +105,11 @@ export interface Chat {
 }
 
 export interface User {
-  timestamp: Timestamp;
-  userName: string;
+  email: string;
+  photoURL: string;
+  username: string;
   rooms: DocumentReference[];
-}
+};
 
 export interface Room {
   name: string;
