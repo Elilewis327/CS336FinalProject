@@ -7,8 +7,14 @@ import {
   getDoc,
   addDoc,
   setDoc,
+  updateDoc,
   DocumentReference,
   Timestamp,
+  query,
+  where,
+  serverTimestamp, 
+  FieldValue,
+  arrayUnion
 } from '@angular/fire/firestore';
 import {
   Auth,
@@ -16,8 +22,8 @@ import {
   user,
   OAuthProvider,
   User as FirebaseUser,
-} from "@angular/fire/auth";
-import { BehaviorSubject, Observable } from 'rxjs';
+} from '@angular/fire/auth';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -30,24 +36,25 @@ export class DbService {
 
   private fireAuth: Auth = inject(Auth);
   private user$: Observable<FirebaseUser | null> = user(this.fireAuth);
-  public user: User | null = null;
+  public user: User | undefined;
+  public chats$: { id: Observable<Chat[]> } | {} = {};
 
-  public async userLogin(providerName: string = "google.com"): Promise<void> {
+  public async userLogin(providerName: string = 'google.com'): Promise<void> {
     const provider = new OAuthProvider(providerName);
     const creds = await signInWithPopup(this.fireAuth, provider);
     // user$ is now set (same as creds)
 
-    const userDoc = await getDoc(doc(this.firestore, "users", creds.user.uid));
+    const userDoc = await getDoc(doc(this.firestore, 'users', creds.user.uid));
     if (!userDoc.exists()) {
       // create user if they aren't in the db
       try {
         const userValues: User = {
           email: creds.user.email!,
           photoURL: creds.user.photoURL!,
-          username: creds.user.email!.split("@")[0], // default to email
+          username: creds.user.email!.split('@')[0], // default to email
           rooms: [],
         };
-        await setDoc(doc(this.firestore, "users", creds.user.uid), userValues);
+        await setDoc(doc(this.firestore, 'users', creds.user.uid), userValues);
       } catch (error) {
         console.error(error); // lazy
       }
@@ -55,17 +62,18 @@ export class DbService {
   }
 
   constructor() {
-    this.user$.subscribe(async firebaseUser => {
+    this.user$.subscribe(async (firebaseUser) => {
       if (firebaseUser) {
-        const docData = await getDoc(doc(this.firestore, "users", firebaseUser.uid));
-        if (docData.exists())
-          this.user = docData.data() as User;
+        const docData = await getDoc(
+          doc(this.firestore, 'users', firebaseUser.uid)
+        );
+        if (docData.exists()) this.user = docData.data() as User;
         this.getRooms();
       }
     });
   }
 
-  async getRooms() {
+  private async getRooms() {
     if (!this.user)
       throw new Error('user undefined when trying to fetch rooms');
 
@@ -91,9 +99,44 @@ export class DbService {
   }
 
   // this can't actually accept a Chat type because of serverTimestamp and id etc
-  post(message: any) {
+  public async post(message: any) {
     //return addDoc(this.ChatsCollection, message);
     return;
+  }
+
+  public async getChats(id: string) {
+    if (!this.user) return;
+  }
+
+  public async findMatchingUser(keyword: string): Promise<string> {
+    const usersCollection = collection(this.firestore, 'users');
+    const userQuery = query(usersCollection, where('username', '==', keyword));
+    const possibleMatches: User[] = await firstValueFrom(collectionData(userQuery, { idField: 'id' })) as User[];
+  
+    // Check for a match and return the user ID if available
+    if (possibleMatches.length > 0) {
+      return possibleMatches[0].id!;
+    }
+    
+    return "";
+  }
+
+  public async createChatRoom(room: Room) {
+    const roomsCollection = collection(this.firestore, 'rooms');
+    room['timestamp'] = serverTimestamp();
+
+    let userRefs: any = [];
+    room['users'].forEach(user => {
+      userRefs.push(doc(this.firestore, 'users/' + user.id))
+    });
+
+    room['users'] = userRefs;
+    let roomDocument = await addDoc(roomsCollection, room);
+
+    userRefs.forEach( (user: any) => {
+      updateDoc(doc(this.firestore, `users/${user.id}`), { rooms: arrayUnion(doc(this.firestore, 'rooms/' + roomDocument.id)) });
+    });
+
   }
 }
 
@@ -109,11 +152,12 @@ export interface User {
   photoURL: string;
   username: string;
   rooms: DocumentReference[];
-};
+  id?: string;
+}
 
 export interface Room {
   name: string;
-  timestamp: Timestamp;
-  users: any;
-  id: string | undefined;
+  timestamp?: Timestamp | FieldValue;
+  users: any[];
+  id?: string;
 }

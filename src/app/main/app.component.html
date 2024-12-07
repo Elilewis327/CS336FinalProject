@@ -1,1 +1,14 @@
-<router-outlet />
+<main class="row">
+  <div class="col-3">
+    <app-directory />
+  </div>
+  <div class="col-7">
+    <router-outlet />
+  </div>
+  
+  <div class="col-2">
+    <button (click)="DbService.userLogin()">Login</button>
+  </div>
+</main>
+
+
