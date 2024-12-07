@@ -14,7 +14,7 @@ import { Chat } from '../db-service/db-service.service';
   styleUrl: './message-viewer.component.css',
 })
 export class MessageViewerComponent {
-  DbService: DbService = inject(DbService);
+  public dbService: DbService = inject(DbService);
   id = input<string>('');
 
   constructor() {
