@@ -27,6 +27,7 @@ export class CreateChatComponent {
       this.user = "";
       return;
     }
+    
     this.newRoom.users.push({username: this.user, id: userRef});
     this.user = "";
   }
