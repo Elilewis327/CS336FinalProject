@@ -3,7 +3,7 @@
     @if( this.data != undefined){
     <div class="room">
       <div class="card">
-        <a class="card-body fs-4" [routerLink]="[this.data.id]">{{ this.data.name }}</a>
+        <a class="card-body fs-4" [routerLink]="['/' + this.data.id]">{{ this.data.name }}</a>
       </div>
     </div>
     }

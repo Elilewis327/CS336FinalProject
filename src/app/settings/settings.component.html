@@ -1,0 +1,6 @@
+<details><summary>Account Settings</summary>
+  <label>Display Name<input placeholder="Username" [(ngModel)]="username" type="text" /></label>
+</details>
+<details><summary>Graphics</summary>
+  <label>Font Size<input placeholder="Font Size" (input)="updateFontSize($event)" type="number" min="0" [(ngModel)]="fontSize"></label>
+</details>

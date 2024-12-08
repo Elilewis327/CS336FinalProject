@@ -4,11 +4,12 @@
     </div>
     <div class="col-7">
       <div class="container messageViewer">
-        {{this.id()}}
+      <p [ngStyle]="{'font-size.px': fontSize}">{{this.id()}}</p>
       </div>
       <app-message-sender />
     </div>
     <div class="col-2">
-      <button (click)="dbService.userLogout()">Logout</button>
+      <app-settings (fontSizeOut)="updateFontSize($event)" />
+      <button id="logout-button" (click)="dbService.userLogout()">Logout</button>
     </div>
 </main>
