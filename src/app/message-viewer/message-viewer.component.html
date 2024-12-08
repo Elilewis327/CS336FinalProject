@@ -1,14 +1,4 @@
-<main class="row">
-    <div class="col-3">
-      <app-directory />
-    </div>
-    <div class="col-7">
-      <div class="container messageViewer">
-        {{this.id()}}
-      </div>
-      <app-message-sender />
-    </div>
-    <div class="col-2">
-      <button (click)="dbService.userLogout()">Logout</button>
-    </div>
-</main>
+<div class="container">
+  <div class="messageViewer"></div>
+  <app-message-sender />
+</div>

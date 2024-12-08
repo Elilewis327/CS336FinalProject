@@ -3,3 +3,12 @@ body {
   background-color: #282A36;
   color: #50FA7B
 }
+
+.sideBarButton {
+  width: 95%;
+  max-width: 400px;
+  margin-top: 10px;
+  padding: 5px;
+  border-radius: 5px;
+  border-width: 2px;
+}

@@ -1,0 +1,48 @@
+<div class="addUserComponent">
+  @for (alert of alerts; track alert) {
+  <ngb-alert
+    [type]="alert.type"
+    (closed)="close(alert)"
+    style="margin: 10px; width: 100%"
+    >{{ alert.message }}</ngb-alert
+  >
+  }
+  <div class="input-group">
+    <span class="input-group-text">Current Users </span>
+    <label class="form-control">
+      @for(user of this.newRoom.users; track $index;){
+      {{ user.username }}, }
+    </label>
+  </div>
+  <div class="input-group">
+    <span class="input-group-text">Add User</span>
+    <input
+      [(ngModel)]="user"
+      type="text"
+      aria-label="User"
+      placeholder="User"
+      class="form-control"
+      (keyup.enter)="addUser()"
+    />
+    <button (click)="addUser()" class="btn btn-outline-primary" type="button">
+      Add User To Chat
+    </button>
+  </div>
+  <div class="input-group">
+    <span class="input-group-text">Name Chat</span>
+    <input
+      [(ngModel)]="this.newRoom.name"
+      type="text"
+      aria-label="chatName"
+      placeholder="Chat Name"
+      class="form-control"
+    />
+    <button
+      (click)="DbService.createChatRoom(this.newRoom)"
+      class="btn btn-outline-primary"
+      type="button"
+    >
+      Create Chat
+    </button>
+  </div>
+</div>
