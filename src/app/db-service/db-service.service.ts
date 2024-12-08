@@ -1,4 +1,5 @@
 import { inject, Injectable } from '@angular/core';
+import { Router } from "@angular/router";
 import {
   Firestore,
   collection,
@@ -23,6 +24,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class DbService {
+  private router: Router = inject(Router);
   private firestore: Firestore = inject(Firestore);
 
   private roomSubject = new BehaviorSubject<Room[]>([]);
@@ -54,13 +56,22 @@ export class DbService {
     }
   }
 
+  public async userLogout(): Promise<void> {
+    await this.fireAuth.signOut();
+    this.router.navigate(["/login"]);
+  }
+
   constructor() {
     this.user$.subscribe(async firebaseUser => {
       if (firebaseUser) {
         const docData = await getDoc(doc(this.firestore, "users", firebaseUser.uid));
-        if (docData.exists())
+        if (docData.exists()) {
           this.user = docData.data() as User;
+          this.router.navigate([""]); // user logged in / is logged in, so let them through
+        }
         this.getRooms();
+      } else {
+        this.user = null;
       }
     });
   }
