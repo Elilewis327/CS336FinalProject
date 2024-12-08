@@ -1,9 +1,9 @@
 <div class="row">
   <div class="col">
     @if( this.data != undefined){
-    <div class="room">
+    <div class="sideBarButton">
       <div class="card">
-        <a class="card-body fs-4" [routerLink]="[this.data.id]">{{ this.data.name }}</a>
+        <a class="card-body fs-4" [routerLink]="['chat/' + this.data.id]">{{ this.data.name }}</a>
       </div>
     </div>
     }

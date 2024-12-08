@@ -1,1 +1,15 @@
-<router-outlet />
+<main class="row">
+  @if(DbService.user != null){
+  <div class="col-3">
+    <app-directory />
+  </div>
+  <div class="col-7">
+    <router-outlet />
+  </div>
+  <div class="col-2">
+    <button (click)="DbService.userLogout()">Logout</button>
+  </div>
+  } @else {
+  <router-outlet />
+  }
+</main>

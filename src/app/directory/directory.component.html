@@ -1,5 +1,14 @@
 <div class="directory">
   @for ( room of this.DbService.Rooms$ | async; track room;){
-    <app-room [data]="room" />
+  <app-room [data]="room" />
   }
+  <div class="row">
+    <div class="col">
+      <div class="sideBarButton">
+        <div class="card">
+          <a class="card-body fs-4" [routerLink]="['new-chat']">New Chat</a>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
