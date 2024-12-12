@@ -15,6 +15,12 @@ import { MessageSenderComponent } from '../message-sender/message-sender.compone
 export class MessageViewerComponent {
   public DbService: DbService = inject(DbService);
   id = input<string>('');
+  public fontSize: number = localStorage["fontSize"] || 18;
+
+  public updateFontSize(newVal: number): void {
+    this.fontSize = newVal;
+    localStorage["fontSize"] = newVal;
+  }
 
   constructor() {
     
