@@ -9,7 +9,12 @@
         <div ngbAccordionCollapse>
           <div ngbAccordionBody>
             <label>Display Name<input style="width: 100%" placeholder="Username" [(ngModel)]="username" type="text" /></label>
+            <button class="btn btn-secondary" (click)="updateUser()">Update</button>
           </div>
+          <!-- for whatever god forsaken reason, this cannot go in the div above. it duplicates the checkmark -->
+          @if (checkmark) {
+            <span>Updated &#10004;</span>
+          }
         </div>
       </div>
       <div ngbAccordionItem>
@@ -23,6 +28,6 @@
         </div>
       </div>
     </div>
-    <button class="btn btn-secondary"(click)="dbService.userLogout()">Logout</button>
+    <button class="btn btn-secondary" (click)="dbService.userLogout()">Logout</button>
   </div>
 </div>

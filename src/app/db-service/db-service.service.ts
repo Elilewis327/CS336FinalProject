@@ -13,7 +13,7 @@ import {
   Timestamp,
   query,
   where,
-  serverTimestamp, 
+  serverTimestamp,
   FieldValue,
   arrayUnion
 } from '@angular/fire/firestore';
@@ -55,17 +55,23 @@ export class DbService {
           photoURL: creds.user.photoURL!,
           username: creds.user.email!.split('@')[0], // default to email
           rooms: [],
+          id: creds.user.uid,
         };
         await setDoc(doc(this.firestore, 'users', creds.user.uid), userValues);
       } catch (error) {
         console.error(error); // lazy
       }
     }
+    this.router.navigate(["/"]); // send user back home
   }
 
   public async userLogout(): Promise<void> {
     await this.fireAuth.signOut();
     this.router.navigate(["/login"]);
+  }
+
+  public async updateUserInfo(userInfo: User): Promise<void> {
+    await setDoc(doc(this.firestore, "users", this.user?.id!), userInfo);
   }
 
   constructor() {
@@ -122,12 +128,12 @@ export class DbService {
     const usersCollection = collection(this.firestore, 'users');
     const userQuery = query(usersCollection, where('username', '==', keyword));
     const possibleMatches: User[] = await firstValueFrom(collectionData(userQuery, { idField: 'id' })) as User[];
-  
+
     // Check for a match and return the user ID if available
     if (possibleMatches.length > 0) {
       return possibleMatches[0].id!;
     }
-    
+
     return "";
   }
 
