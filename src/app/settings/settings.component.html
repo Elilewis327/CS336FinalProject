@@ -1,6 +1,28 @@
-<details><summary>Account Settings</summary>
-  <label>Display Name<input placeholder="Username" [(ngModel)]="username" type="text" /></label>
-</details>
-<details><summary>Graphics</summary>
-  <label>Font Size<input placeholder="Font Size" (input)="updateFontSize($event)" type="number" min="0" [(ngModel)]="fontSize"></label>
-</details>
+<button (click)="sideMenuCollapsed = !sideMenuCollapsed" type="button" class="btn btn-primary col-12">Settings</button>
+<div [ngbCollapse]="sideMenuCollapsed">
+  <div class="card card-body">
+    <div ngbAccordion [closeOthers]="true">
+      <div ngbAccordionItem>
+        <h2 ngbAccordionHeader>
+          <button ngbAccordionButton>Account Settings</button>
+        </h2>
+        <div ngbAccordionCollapse>
+          <div ngbAccordionBody>
+            <label>Display Name<input style="width: 100%" placeholder="Username" [(ngModel)]="username" type="text" /></label>
+          </div>
+        </div>
+      </div>
+      <div ngbAccordionItem>
+        <h2 ngbAccordionHeader>
+          <button ngbAccordionButton>Graphics Settings</button>
+        </h2>
+        <div ngbAccordionCollapse>
+          <div ngbAccordionBody>
+            <label>Font Size<input style="width: 100%" placeholder="Font Size" (input)="updateFontSize($event)" type="number" min="0" [(ngModel)]="fontSize"></label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-secondary"(click)="dbService.userLogout()">Logout</button>
+  </div>
+</div>

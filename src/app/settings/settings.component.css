@@ -1,3 +1,13 @@
 .logout-button {
   text-align: center;
 }
+
+.section {
+  summary {
+    font-size: 16pt;
+  }
+
+  * {
+    margin-left: 10px;
+  }
+}
