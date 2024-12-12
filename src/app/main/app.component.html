@@ -7,6 +7,7 @@
     <router-outlet />
   </div>
   <div class="col-2">
+    <app-settings (fontSizeOut)="updateFontSize($event)" />
     <button (click)="DbService.userLogout()">Logout</button>
   </div>
   } @else {
