@@ -19,7 +19,9 @@ export class MessageComponent {
       return new Date(0);
 
     const ts = this.data.timestamp as Timestamp;
-    return ts.toDate();
+    if (ts !== null)
+      return ts.toDate();
+    return new Date(0);
   }
 
 
