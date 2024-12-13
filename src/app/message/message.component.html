@@ -1,12 +1,9 @@
-<div class="row">
-  <div class="col">
-    @if( this.data != undefined){
-    <div class="message">
-      <div class="card">
-        <div class="card-body fs-4">{{ this.data.message }}</div>
-      </div>
-      <span> {{ this.data.userName }}</span> at {{this.data.timestamp.toDate() | date:"medium"}}
-    </div>
-    }
+@if( this.data != undefined){
+<div class="message">
+  <div class="card">
+    <div class="card-body fs-4">{{ this.data.message }}</div>
   </div>
+  <span> {{ this.data.username }}</span> at
+  {{ this.getTimestamp() | date : "medium" }}
 </div>
+}

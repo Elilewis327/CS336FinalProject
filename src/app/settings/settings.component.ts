@@ -1,16 +1,19 @@
-import { Component, inject, output } from '@angular/core';
-import { FormsModule } from "@angular/forms";
-import { DbService } from "../db-service/db-service.service";
-import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
+import { Component, inject, output, input } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { DbService } from '../db-service/db-service.service';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbAlertModule } from '@ng-bootstrap/ng-bootstrap';
+import { Alert } from '../create-chat/create-chat.component';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [FormsModule, NgbModule],
+  imports: [FormsModule, NgbModule, NgbAlertModule],
   templateUrl: './settings.component.html',
-  styleUrl: './settings.component.css'
+  styleUrl: './settings.component.css',
 })
 export class SettingsComponent {
+  public roomId = input("");
   public dbService = inject(DbService);
   public username: string = this.dbService.user!.username;
   public profilePicture: string = this.dbService.user!.photoURL;
@@ -18,9 +21,34 @@ export class SettingsComponent {
   public fontSizeOut = output<number>();
   public sideMenuCollapsed: boolean = true;
   public checkmark: boolean = false;
+  public userToAdd: string = '';
+  public alerts: Alert[] = [];
 
   public updateFontSize(e: Event): void {
-    this.fontSizeOut.emit((e.target! as HTMLFormElement)["valueAsNumber"]);
+    this.fontSizeOut.emit((e.target! as HTMLFormElement)['valueAsNumber']);
+  }
+
+  public deleteRoom() {
+    this.dbService.deleteRoom(this.roomId() as string);
+  }
+
+  public async addUser() {
+    const userRef = await this.dbService.findMatchingUser(this.userToAdd);
+
+    if (userRef === "") {
+      this.alerts.push({type: 'warning', message: `Username ${this.userToAdd} not found.`});
+      return;
+    }
+
+    try {
+      await this.dbService.addUserToRoom(userRef, this.roomId() as string);
+    } catch (e){
+      this.alerts.push({type: 'warning', message: `${e}`});
+    }
+  }
+
+  public leaveRoom() {
+    this.dbService.leaveRoom(this.roomId() as string);
   }
 
   public updatePFP(event: Event): void {
@@ -49,12 +77,16 @@ export class SettingsComponent {
       })
       .then(() => {
         this.checkmark = true;
-        setTimeout( () => {
+        setTimeout(() => {
           this.checkmark = false;
         }, 2000);
       })
       .catch((e) => {
-        console.error("Updating user info:", e);
+        console.error('Updating user info:', e);
       });
+  }
+
+  public close(alert: Alert) {
+    this.alerts.splice(this.alerts.indexOf(alert), 1);
   }
 }

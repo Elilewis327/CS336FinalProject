@@ -18,6 +18,14 @@ export class CreateChatComponent {
   alerts: Alert[] = [];
   newRoom: Room = {name: '', users: []}
 
+  constructor () {
+    this.addSelf();
+  }
+
+  async addSelf(){
+    this.newRoom.users.push({username: this.DbService.user?.username, id: this.DbService.user?.id});
+  }
+
   async addUser(){
     this.user = this.user.trim();
     if (this.user === "") return;
@@ -27,6 +35,15 @@ export class CreateChatComponent {
       this.alerts.push({type: 'warning', message: `Username ${this.user} not found.`});
       this.user = "";
       return;
+    }
+
+    for(let i = 0; i < this.newRoom.users.length; i++){ 
+      console.log(this.newRoom.users[i].id);
+      if (this.newRoom.users[i].id === userRef){ 
+        this.alerts.push({type: 'danger',  message: `Username ${this.user} already is a member of this chat.`});
+        this.user = "";
+        return;
+      }
     }
     
     this.newRoom.users.push({username: this.user, id: userRef});
@@ -39,7 +56,7 @@ export class CreateChatComponent {
 
 }
 
-interface Alert {
+export interface Alert {
 	type: string;
 	message: string;
 }

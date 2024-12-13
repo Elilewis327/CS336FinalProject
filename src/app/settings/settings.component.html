@@ -1,4 +1,19 @@
-<button (click)="sideMenuCollapsed = !sideMenuCollapsed" type="button" class="btn btn-primary col-12">Settings</button>
+@for (alert of alerts; track alert) {
+  <ngb-alert
+    [type]="alert.type"
+    (closed)="close(alert)"
+    style="margin: 10px; width: 100%"
+    >{{ alert.message }}</ngb-alert
+  >
+  }
+
+<button
+  (click)="sideMenuCollapsed = !sideMenuCollapsed"
+  type="button"
+  class="btn btn-primary col-12"
+>
+  Settings
+</button>
 <div [ngbCollapse]="sideMenuCollapsed">
   <div class="card card-body">
     <div ngbAccordion [closeOthers]="true">
@@ -8,7 +23,13 @@
         </h2>
         <div ngbAccordionCollapse>
           <div ngbAccordionBody>
-            <label>Display Name<input style="width: 100%" placeholder="Username" [(ngModel)]="username" type="text" /></label>
+            <label
+              >Display Name<input
+                style="width: 100%"
+                placeholder="Username"
+                [(ngModel)]="username"
+                type="text"
+            /></label>
             <label style="width: 100%;">
               <p>Profile Picture</p>
               <img class="img-thumbnail img-fluid" src="{{ profilePicture }}" />
@@ -18,21 +39,76 @@
           </div>
           <!-- for whatever god forsaken reason, this cannot go in the div above. it duplicates the checkmark -->
           @if (checkmark) {
-            <span>Updated &#10004;</span>
+          <span>Updated &#10004;</span>
           }
         </div>
       </div>
+
       <div ngbAccordionItem>
         <h2 ngbAccordionHeader>
           <button ngbAccordionButton>Graphics Settings</button>
         </h2>
         <div ngbAccordionCollapse>
           <div ngbAccordionBody>
-            <label>Font Size<input style="width: 100%" placeholder="Font Size" (input)="updateFontSize($event)" type="number" min="0" [(ngModel)]="fontSize"></label>
+            <label
+              >Font Size<input
+                style="width: 100%"
+                placeholder="Font Size"
+                (input)="updateFontSize($event)"
+                type="number"
+                min="0"
+                [(ngModel)]="fontSize"
+            /></label>
+          </div>
+        </div>
+      </div>
+
+      <div ngbAccordionItem>
+        <h2 ngbAccordionHeader>
+          <button ngbAccordionButton>Room Settings</button>
+        </h2>
+        <div ngbAccordionCollapse>
+          <div ngbAccordionBody>
+            <label
+              >Delete Room<button
+                class="btn btn-outline-primary"
+                (click)="deleteRoom()"
+              >
+                Delete Room
+              </button></label
+            >
+          </div>
+          <div ngbAccordionBody>
+            <label>Add User</label>
+            <input
+                style="width: 100%"
+                placeholder="User To Add"
+                [(ngModel)]="userToAdd"
+                type="text"
+            />
+            <button class="btn btn-outline-primary" (click)="addUser()">
+              Add User
+            </button>
+          </div>
+
+          <div ngbAccordionBody>
+            <label
+              >Leave Room <button
+                class="btn btn-outline-primary"
+                (click)="leaveRoom()"
+              >
+                Leave Room
+              </button></label
+            >
           </div>
         </div>
       </div>
     </div>
-    <button class="btn btn-secondary logout-button" (click)="dbService.userLogout()">Logout</button>
+    <button
+      class="btn btn-secondary logout-button"
+      (click)="dbService.userLogout()"
+    >
+      Logout
+    </button>
   </div>
 </div>
