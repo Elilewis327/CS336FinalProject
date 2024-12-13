@@ -2,7 +2,6 @@ import { Component, inject, input, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MessageComponent } from '../message/message.component';
 import { DbService } from '../db-service/db-service.service';
-import { Chat } from '../db-service/db-service.service';
 import { MessageSenderComponent } from '../message-sender/message-sender.component';
 import { SettingsComponent } from '../settings/settings.component';
 
@@ -34,7 +33,4 @@ export class MessageViewerComponent {
     localStorage['fontSize'] = newVal;
   }
 
-  public deleteRoom() {
-    this.DbService.deleteRoom(this.id());
-  }
 }

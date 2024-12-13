@@ -35,13 +35,8 @@ export class CreateChatComponent {
       this.alerts.push({type: 'warning', message: `Username ${this.user} not found.`});
       this.user = "";
       return;
-    }else if (this.newRoom.users.length >= 32){
-      this.alerts.push({type: 'danger', message: `No more than 32 users may be added to a single chat.`});
-      this.user = "";
-      return;
     }
 
-   
     for(let i = 0; i < this.newRoom.users.length; i++){ 
       console.log(this.newRoom.users[i].id);
       if (this.newRoom.users[i].id === userRef){ 
@@ -50,7 +45,6 @@ export class CreateChatComponent {
         return;
       }
     }
-    
     
     this.newRoom.users.push({username: this.user, id: userRef});
     this.user = "";
@@ -62,7 +56,7 @@ export class CreateChatComponent {
 
 }
 
-interface Alert {
+export interface Alert {
 	type: string;
 	message: string;
 }

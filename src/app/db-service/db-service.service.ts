@@ -66,8 +66,11 @@ export class DbService {
         );
         if (userData.exists()) console.log(userData.data());
 
+        try {
         await this.addUserToRoom(creds.user.uid, 'All_User');
-
+        } catch {
+          console.error("Something broke trying to add new user to All_User chat")
+        }
         this.router.navigate(['']);
       } catch (error) {
         console.error(error); // lazy
@@ -236,8 +239,27 @@ export class DbService {
       'chats'
     );
 
-    const username = (await getDoc(userDocRef)).data()!['username'];
+    const userDoc = await getDoc(userDocRef);
+    if (!userDoc.exists()) {
+      console.error("User not found");
+      throw new Error('User not found');
+    }
 
+    const roomDoc = await getDoc(roomDocRef);
+    if (!roomDoc.exists()) {
+      console.error("Room not found");
+      throw new Error('Room not found');
+    }
+
+    const users = (roomDoc.data() as Room).users;
+    const username = (userDoc.data() as User).username;
+
+    users.forEach(ref => {
+      if (ref.id === userId){
+        throw new Error(`User ${username} is already here.`)
+      }
+    })
+    
     const joinedChat = {
       message: `${username} Joined The Room. Say Hi!`,
       timestamp: serverTimestamp(),
@@ -248,6 +270,37 @@ export class DbService {
     updateDoc(userDocRef, { rooms: arrayUnion(roomDocRef) });
     updateDoc(roomDocRef, { users: arrayUnion(userDocRef) });
   }
+
+  public async leaveRoom(roomId: string){
+    const roomDocRef = doc(this.firestore, 'rooms/' + roomId);
+    const userDocRef = doc(this.firestore, 'users/' + this.user?.id);
+
+    const chatsCollection = collection(
+      this.firestore,
+      'rooms',
+      roomId,
+      'chats'
+    );
+
+    const userDoc = await getDoc(userDocRef);
+    if (!userDoc.exists()) {
+      console.error("User not found");
+      throw new Error('User not found');
+    }
+
+    const username = (userDoc.data() as User).username;
+
+    const joinedChat = {
+      message: `${username} Left The Room. 😞`,
+      timestamp: serverTimestamp(),
+      username: username,
+    } as Chat;
+    addDoc(chatsCollection, joinedChat);
+
+    updateDoc(userDocRef, { rooms: arrayRemove(roomDocRef) });
+    updateDoc(roomDocRef, { users: arrayRemove(userDocRef) });
+  }
+
 }
 
 export interface Chat {

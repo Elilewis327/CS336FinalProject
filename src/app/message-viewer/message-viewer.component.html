@@ -13,8 +13,6 @@
   </div>
 
   <div class="col-3">
-    <app-settings (fontSizeOut)="updateFontSize($event)" />
-    <button class="btn btn-outline-primary" (click)="DbService.userLogout()">Logout</button>
-    <button class="btn btn-outline-primary" (click)="deleteRoom()">Delete Room</button>
+    <app-settings [roomId]="this.id()" (fontSizeOut)="updateFontSize($event)" />
   </div>
 </div>
