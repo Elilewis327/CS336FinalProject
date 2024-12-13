@@ -13,6 +13,7 @@ import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 export class SettingsComponent {
   public dbService = inject(DbService);
   public username: string = this.dbService.user!.username;
+  public profilePicture: string = this.dbService.user!.photoURL;
   public fontSize: number = localStorage["fontSize"] || 0;
   public fontSizeOut = output<number>();
   public sideMenuCollapsed: boolean = true;
@@ -22,8 +23,30 @@ export class SettingsComponent {
     this.fontSizeOut.emit((e.target! as HTMLFormElement)["valueAsNumber"]);
   }
 
+  public updatePFP(event: Event): void {
+    let base64Encoding: string = "";
+
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        base64Encoding = reader.result as string;
+        console.log(base64Encoding);
+        this.profilePicture = base64Encoding;
+
+      }
+      reader.readAsDataURL(file);
+    }
+  }
+
   public updateUser(): void {
-    this.dbService.updateUserInfo({...this.dbService.user!, username: this.username})
+    this.dbService.updateUserInfo(
+      {
+        ...this.dbService.user!,
+        username: this.username,
+        photoURL: this.profilePicture, // technically still dataURL...
+      })
       .then(() => {
         this.checkmark = true;
         setTimeout( () => {

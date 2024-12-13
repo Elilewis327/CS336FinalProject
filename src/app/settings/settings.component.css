@@ -67,3 +67,7 @@ button.logout-button {
   margin-top: 2rem;
   width: 100%;
 }
+
+.img-fluid {
+  width: 100%;
+}
