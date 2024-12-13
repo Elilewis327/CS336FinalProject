@@ -1,12 +1,17 @@
 <main class="container-fluid">
   <div class="row">
-    @if(DbService.user != null){
+    @if(DbService.user != null) {
     <div class="col-3">
       <app-directory />
     </div>
-    }
     <div class="col-9">
       <router-outlet />
     </div>
+    }
+    @else { <!-- Login page. yes this is lazy. yes it looks better with ease. -->
+    <div class="col-12">
+      <router-outlet />
+    </div>
+    }
   </div>
 </main>

@@ -30,9 +30,12 @@
                 [(ngModel)]="username"
                 type="text"
             /></label>
-            <button class="btn btn-secondary" (click)="updateUser()">
-              Update
-            </button>
+            <label style="width: 100%;">
+              <p>Profile Picture</p>
+              <img class="img-thumbnail img-fluid" src="{{ profilePicture }}" />
+              <input type="file" style="visibility: hidden;" (change)="updatePFP($event)" accept="image/png, image/jpeg"/>
+            </label>
+            <button class="btn btn-secondary" (click)="updateUser()">Update</button>
           </div>
           <!-- for whatever god forsaken reason, this cannot go in the div above. it duplicates the checkmark -->
           @if (checkmark) {
@@ -103,7 +106,7 @@
     </div>
     <button
       class="btn btn-secondary logout-button"
-      (click)="DbService.userLogout()"
+      (click)="dbService.userLogout()"
     >
       Logout
     </button>
