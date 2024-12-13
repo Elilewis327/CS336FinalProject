@@ -1,4 +1,4 @@
-import { Component, inject, Input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { DbService, Chat } from '../db-service/db-service.service';
 import { serverTimestamp } from '@angular/fire/firestore';
 import { FormsModule } from '@angular/forms';
@@ -13,7 +13,8 @@ import { FormsModule } from '@angular/forms';
 export class MessageSenderComponent {
   DbService: DbService = inject(DbService);
   message: string = '';
-  @Input() roomId: string | undefined = undefined;
+  roomId = input("");
+  
 
   send() {
     const message = {
@@ -22,6 +23,6 @@ export class MessageSenderComponent {
       username: this.DbService.user?.username,
     };
 
-    this.DbService.sendMessage(message as Chat, this.roomId as string);
+    this.DbService.sendMessage(message as Chat, this.roomId() as string);
   }
 }

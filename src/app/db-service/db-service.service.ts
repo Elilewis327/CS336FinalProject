@@ -202,8 +202,8 @@ export class DbService {
     });
   }
 
-  public async deleteRoom(id: string) {
-    const roomDocRef = doc(this.firestore, 'rooms/' + id);
+  public async deleteRoom(roomId: string) {
+    const roomDocRef = doc(this.firestore, 'rooms/' + roomId);
     const roomDoc = await getDoc(roomDocRef);
 
     if (!roomDoc.exists()) return; // already gone
@@ -215,12 +215,13 @@ export class DbService {
       console.warn(
         `Not permitted. You Are: ${this.user?.id}, while owner is: ${roomDocData.users[0].id}`
       );
-      return; // not allowed
+
+      throw new Error('Not Permitted');
     }
 
     roomDocData.users.forEach((user) => {
       updateDoc(user, {
-        ['rooms']: arrayRemove(doc(this.firestore, `rooms/${id}`)),
+        ['rooms']: arrayRemove(roomDocRef),
       });
     });
 

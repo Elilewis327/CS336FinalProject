@@ -13,11 +13,11 @@ import { Alert } from '../create-chat/create-chat.component';
   styleUrl: './settings.component.css',
 })
 export class SettingsComponent {
-  public roomId = input("");
+  public roomId = input('');
   public dbService = inject(DbService);
   public username: string = this.dbService.user!.username;
   public profilePicture: string = this.dbService.user!.photoURL;
-  public fontSize: number = localStorage["fontSize"] || 0;
+  public fontSize: number = localStorage['fontSize'] || 0;
   public fontSizeOut = output<number>();
   public sideMenuCollapsed: boolean = true;
   public checkmark: boolean = false;
@@ -28,22 +28,32 @@ export class SettingsComponent {
     this.fontSizeOut.emit((e.target! as HTMLFormElement)['valueAsNumber']);
   }
 
-  public deleteRoom() {
-    this.dbService.deleteRoom(this.roomId() as string);
+  public async deleteRoom() {
+    try {
+      await this.dbService.deleteRoom(this.roomId() as string);
+    } catch (e) {
+      this.alerts.push({
+        type: 'danger',
+        message: 'You do not have permision to delete this room.',
+      });
+    }
   }
 
   public async addUser() {
     const userRef = await this.dbService.findMatchingUser(this.userToAdd);
 
-    if (userRef === "") {
-      this.alerts.push({type: 'warning', message: `Username ${this.userToAdd} not found.`});
+    if (userRef === '') {
+      this.alerts.push({
+        type: 'warning',
+        message: `Username ${this.userToAdd} not found.`,
+      });
       return;
     }
 
     try {
       await this.dbService.addUserToRoom(userRef, this.roomId() as string);
-    } catch (e){
-      this.alerts.push({type: 'warning', message: `${e}`});
+    } catch (e) {
+      this.alerts.push({ type: 'warning', message: `${e}` });
     }
   }
 
@@ -52,7 +62,7 @@ export class SettingsComponent {
   }
 
   public updatePFP(event: Event): void {
-    let base64Encoding: string = "";
+    let base64Encoding: string = '';
 
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -62,15 +72,14 @@ export class SettingsComponent {
         base64Encoding = reader.result as string;
         console.log(base64Encoding);
         this.profilePicture = base64Encoding;
-
-      }
+      };
       reader.readAsDataURL(file);
     }
   }
 
   public updateUser(): void {
-    this.dbService.updateUserInfo(
-      {
+    this.dbService
+      .updateUserInfo({
         ...this.dbService.user!,
         username: this.username,
         photoURL: this.profilePicture, // technically still dataURL...
