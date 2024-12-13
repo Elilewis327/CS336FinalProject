@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Router } from "@angular/router";
+import { Router } from '@angular/router';
 import {
   Firestore,
   collection,
@@ -13,9 +13,12 @@ import {
   Timestamp,
   query,
   where,
-  serverTimestamp, 
+  serverTimestamp,
   FieldValue,
-  arrayUnion
+  arrayUnion,
+  arrayRemove,
+  deleteDoc,
+  orderBy,
 } from '@angular/fire/firestore';
 import {
   Auth,
@@ -24,7 +27,7 @@ import {
   OAuthProvider,
   User as FirebaseUser,
 } from '@angular/fire/auth';
-import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -33,19 +36,18 @@ export class DbService {
   private router: Router = inject(Router);
   private firestore: Firestore = inject(Firestore);
 
-  private roomSubject = new BehaviorSubject<Room[]>([]);
-  public Rooms$: Observable<Room[]> = this.roomSubject.asObservable();
+  public Rooms$: Observable<Room[]> | undefined;
 
   private fireAuth: Auth = inject(Auth);
+  private userDocumentRef: DocumentReference | undefined;
   private user$: Observable<FirebaseUser | null> = user(this.fireAuth);
   public user: User | null = null;
-  public chats$: { id: Observable<Chat[]> } | {} = {};
+  public chats$: Observable<Chat[]> | undefined;
 
   public async userLogin(providerName: string = 'google.com'): Promise<void> {
     const provider = new OAuthProvider(providerName);
     const creds = await signInWithPopup(this.fireAuth, provider);
     // user$ is now set (same as creds)
-
     const userDoc = await getDoc(doc(this.firestore, 'users', creds.user.uid));
     if (!userDoc.exists()) {
       // create user if they aren't in the db
@@ -57,6 +59,15 @@ export class DbService {
           rooms: [],
         };
         await setDoc(doc(this.firestore, 'users', creds.user.uid), userValues);
+
+        const userData = await getDoc(
+          doc(this.firestore, 'users', creds.user.uid)
+        );
+        if (userData.exists()) console.log(userData.data());
+
+        await this.addUserToRoom(creds.user.uid, 'All_User');
+
+        this.router.navigate(['']);
       } catch (error) {
         console.error(error); // lazy
       }
@@ -65,16 +76,18 @@ export class DbService {
 
   public async userLogout(): Promise<void> {
     await this.fireAuth.signOut();
-    this.router.navigate(["/login"]);
+    this.router.navigate(['/login']);
   }
 
   constructor() {
     this.user$.subscribe(async (firebaseUser) => {
       if (firebaseUser) {
-        const docData = await getDoc(doc(this.firestore, "users", firebaseUser.uid));
+        this.userDocumentRef = doc(this.firestore, 'users', firebaseUser.uid);
+        const docData = await getDoc(this.userDocumentRef);
         if (docData.exists()) {
           this.user = docData.data() as User;
-          this.router.navigate([""]); // user logged in / is logged in, so let them through
+          this.user.id = firebaseUser.uid;
+          this.router.navigate(['']); // user logged in / is logged in, so let them through
         }
         this.getRooms();
       } else {
@@ -92,69 +105,151 @@ export class DbService {
       return;
     }
 
-    let roomHolder: Room[] = [];
-
-    for (let i = 0; i < this.user.rooms.length; i++) {
-      let roomRef = this.user.rooms[i];
-      let roomDoc = await getDoc(roomRef);
-
-      if (!roomDoc.exists()) {
-        console.error('Room ref ' + roomRef + " doesn't exist");
-      } else {
-        roomHolder.push(roomDoc.data() as Room);
-        roomHolder[i].id = roomRef.id;
-      }
-    }
-    if (roomHolder.length > 0) this.roomSubject.next(roomHolder);
+    const roomsCollection = collection(this.firestore, 'rooms');
+    const roomsQuery = query(
+      roomsCollection,
+      where('users', 'array-contains', this.userDocumentRef)
+    );
+    this.Rooms$ = collectionData(roomsQuery, { idField: 'id' });
   }
 
-  // this can't actually accept a Chat type because of serverTimestamp and id etc
-  public async post(message: any) {
-    //return addDoc(this.ChatsCollection, message);
-    return;
-  }
-
-  public async getChats(id: string) {
+  public async sendMessage(message: Chat, roomId: string) {
     if (!this.user) return;
+
+    const chatsCollection = collection(
+      this.firestore,
+      'rooms/' + roomId + '/chats'
+    );
+    addDoc(chatsCollection, message);
+  }
+
+  public async getChats(roomId: string) {
+    if (!this.user) return;
+
+    const chatsCollection = collection(
+      this.firestore,
+      'rooms/' + roomId + '/chats'
+    );
+    const sortedQuery = query(chatsCollection, orderBy('timestamp', 'asc'));
+    this.chats$ = collectionData(sortedQuery);
   }
 
   public async findMatchingUser(keyword: string): Promise<string> {
+    const userDoc = await getDoc(doc(this.firestore, 'users/' + keyword));
+    if (userDoc.exists()) {
+      return keyword; // we were given an id
+    }
+
     const usersCollection = collection(this.firestore, 'users');
     const userQuery = query(usersCollection, where('username', '==', keyword));
-    const possibleMatches: User[] = await firstValueFrom(collectionData(userQuery, { idField: 'id' })) as User[];
-  
+    const possibleMatches: User[] = (await firstValueFrom(
+      collectionData(userQuery, { idField: 'id' })
+    )) as User[];
+
     // Check for a match and return the user ID if available
     if (possibleMatches.length > 0) {
       return possibleMatches[0].id!;
     }
-    
-    return "";
+
+    return '';
   }
+
+
 
   public async createChatRoom(room: Room) {
     const roomsCollection = collection(this.firestore, 'rooms');
     room['timestamp'] = serverTimestamp();
 
-    let userRefs: any = [];
-    room['users'].forEach(user => {
-      userRefs.push(doc(this.firestore, 'users/' + user.id))
+    let userRefs: DocumentReference[] = [];
+
+    room['users'].forEach((user) => {
+      userRefs.push(doc(this.firestore, 'users/' + user.id));
     });
 
     room['users'] = userRefs;
-    let roomDocument = await addDoc(roomsCollection, room);
+    const roomDocument = await addDoc(roomsCollection, room);
+    const chatsCollection = collection(
+      this.firestore,
+      'rooms',
+      roomDocument.id,
+      'chats'
+    );
 
-    userRefs.forEach( (user: any) => {
-      updateDoc(doc(this.firestore, `users/${user.id}`), { rooms: arrayUnion(doc(this.firestore, 'rooms/' + roomDocument.id)) });
+    userRefs.forEach(async (ref: any) => {
+      const userDoc = await getDoc(ref);
+      if (!userDoc.exists()) return; // how even lol, this should never happen
+
+      const username = (userDoc.data() as User).username;
+
+      const joinedChat = {
+        message: `${username} Joined The Room. Say Hi!`,
+        timestamp: serverTimestamp(),
+        username: username,
+      } as Chat;
+
+      updateDoc(ref, {
+        rooms: arrayUnion(doc(this.firestore, 'rooms/' + roomDocument.id)),
+      });
+
+      addDoc(chatsCollection, joinedChat);
+    });
+  }
+
+  public async deleteRoom(id: string) {
+    const roomDocRef = doc(this.firestore, 'rooms/' + id);
+    const roomDoc = await getDoc(roomDocRef);
+
+    if (!roomDoc.exists()) return; // already gone
+
+    const roomDocData = roomDoc.data() as Room;
+
+    //check if allowed to delete
+    if (roomDocData.users[0].id !== this.user?.id) {
+      console.warn(
+        `Not permitted. You Are: ${this.user?.id}, while owner is: ${roomDocData.users[0].id}`
+      );
+      return; // not allowed
+    }
+
+    roomDocData.users.forEach((user) => {
+      updateDoc(user, {
+        ['rooms']: arrayRemove(doc(this.firestore, `rooms/${id}`)),
+      });
     });
 
+    deleteDoc(roomDocRef);
+
+    this.router.navigate(['']);
+  }
+
+  public async addUserToRoom(userId: string, roomId: string) {
+    const roomDocRef = doc(this.firestore, 'rooms/' + roomId);
+    const userDocRef = doc(this.firestore, 'users/' + userId);
+    const chatsCollection = collection(
+      this.firestore,
+      'rooms',
+      roomId,
+      'chats'
+    );
+
+    const username = (await getDoc(userDocRef)).data()!['username'];
+
+    const joinedChat = {
+      message: `${username} Joined The Room. Say Hi!`,
+      timestamp: serverTimestamp(),
+      username: username,
+    } as Chat;
+    addDoc(chatsCollection, joinedChat);
+
+    updateDoc(userDocRef, { rooms: arrayUnion(roomDocRef) });
+    updateDoc(roomDocRef, { users: arrayUnion(userDocRef) });
   }
 }
 
 export interface Chat {
-  color: string;
   message: string;
-  timestamp: Timestamp;
-  userName: string;
+  timestamp: Timestamp | FieldValue;
+  username: string;
 }
 
 export interface User {

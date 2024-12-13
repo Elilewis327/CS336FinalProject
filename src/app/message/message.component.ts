@@ -1,6 +1,7 @@
-import { Component, Input } from '@angular/core';
-import { Chat } from '../db-service/db-service.service';
+import { Component, Input, inject } from '@angular/core';
+import { DbService, Chat } from '../db-service/db-service.service';
 import { CommonModule } from '@angular/common';
+import { Timestamp } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-message',
@@ -10,5 +11,16 @@ import { CommonModule } from '@angular/common';
   styleUrl: './message.component.css'
 })
 export class MessageComponent {
+  DbService: DbService = inject(DbService);
   @Input() data: Chat | undefined = undefined;
+
+  getTimestamp(){
+    if (!this.data)
+      return new Date(0);
+
+    const ts = this.data.timestamp as Timestamp;
+    return ts.toDate();
+  }
+
+
 }

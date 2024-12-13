@@ -1,4 +1,20 @@
-<div class="container">
-  <div class="messageViewer"></div>
-  <app-message-sender />
+<div class="row">
+  <div class="col-9">
+    <div class="messageViewer">
+      @for ( chat of this.DbService.chats$ | async; track chat;){
+        @if ( chat.username == this.DbService.user?.username ){
+          <app-message [data]="chat" class="right"/>
+        } @else {
+          <app-message [data]="chat" class="left" />
+        }
+      }
+    </div>
+    <app-message-sender [roomId]="this.id()" />
+  </div>
+
+  <div class="col-3">
+    <app-settings (fontSizeOut)="updateFontSize($event)" />
+    <button class="btn btn-outline-primary" (click)="DbService.userLogout()">Logout</button>
+    <button class="btn btn-outline-primary" (click)="deleteRoom()">Delete Room</button>
+  </div>
 </div>

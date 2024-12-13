@@ -5,7 +5,7 @@ import { authGuard } from '../guards/auth.guard';
 import { CreateChatComponent } from '../create-chat/create-chat.component';
 
 export const routes: Routes = [
-  { path: '', component: MessageViewerComponent, canActivate: [authGuard] },
+ // { path: '', component: MessageViewerComponent, canActivate: [authGuard] },
   { path: 'login', component: LoginScreenComponent },
   { path: 'new-chat', component: CreateChatComponent, canActivate: [authGuard] },
   {
@@ -13,5 +13,5 @@ export const routes: Routes = [
     component: MessageViewerComponent,
     canActivate: [authGuard]
   },
-  { path: '**', redirectTo: '' },
+  { path: '**', redirectTo: 'chat/All_User' }, //redirect to all users chat by default
 ];
