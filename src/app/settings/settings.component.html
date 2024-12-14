@@ -51,13 +51,11 @@
         <div ngbAccordionCollapse>
           <div ngbAccordionBody>
             <label
-              >Font Size<input
-                style="width: 100%"
-                placeholder="Font Size"
-                (input)="updateFontSize($event)"
-                type="number"
-                min="0"
-                [(ngModel)]="fontSize"
+              >Chatting Color<input
+                style="width: 100%; height: 50px;"
+                (input)="updateChattingColor($event)"
+                type="color"
+                [(ngModel)]="chattingColor"
             /></label>
           </div>
         </div>

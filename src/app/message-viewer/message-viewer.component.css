@@ -1,6 +1,8 @@
 .messageViewer {
   height: 90vh;
-  overflow: scroll;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column-reverse;
 }
 
 .right {

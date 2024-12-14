@@ -20,7 +20,7 @@ import { SettingsComponent } from '../settings/settings.component';
 export class MessageViewerComponent {
   public DbService: DbService = inject(DbService);
   public id = input<string>('');
-  public fontSize: number = localStorage['fontSize'] || 18;
+  public chattingColor: string = localStorage['chattingColor'] || '#282a36';
 
   constructor() {
     effect(() => {
@@ -28,9 +28,9 @@ export class MessageViewerComponent {
     });
   }
 
-  public updateFontSize(newVal: number): void {
-    this.fontSize = newVal;
-    localStorage['fontSize'] = newVal;
+  public updateChattingColor(newVal: string): void {
+    this.chattingColor = newVal;
+    localStorage['chattingColor'] = newVal;
   }
 
 }

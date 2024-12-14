@@ -1,8 +1,8 @@
 <div class="row">
-  <div class="col-9">
+  <div class="col-9" style="background-color: {{ chattingColor }};">
     <div class="messageViewer">
-      @for ( chat of this.DbService.chats$ | async; track chat;){
-        @if ( chat.username == this.DbService.user?.username ){
+      @for ( chat of this.DbService.chats$ | async; track $index;){
+        @if ( chat.userId == this.DbService.user?.id ){
           <app-message [data]="chat" class="right"/>
         } @else {
           <app-message [data]="chat" class="left" />
@@ -13,6 +13,6 @@
   </div>
 
   <div class="col-3">
-    <app-settings [roomId]="this.id()" (fontSizeOut)="updateFontSize($event)" />
+    <app-settings [roomId]="this.id()" (chattingColorOut)="updateChattingColor($event)" />
   </div>
 </div>

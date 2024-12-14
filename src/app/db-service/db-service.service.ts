@@ -9,7 +9,9 @@ import {
   addDoc,
   setDoc,
   updateDoc,
+  docSnapshots,
   DocumentReference,
+  DocumentSnapshot,
   Timestamp,
   query,
   where,
@@ -27,7 +29,7 @@ import {
   OAuthProvider,
   User as FirebaseUser,
 } from '@angular/fire/auth';
-import { Observable, firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom, takeWhile } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -40,22 +42,27 @@ export class DbService {
 
   private fireAuth: Auth = inject(Auth);
   private userDocumentRef: DocumentReference | undefined;
-  private user$: Observable<FirebaseUser | null> = user(this.fireAuth);
-  public user: User | null = null;
+  private userSubscription$: Observable<User> | null = null;
+  private authUser$: Observable<FirebaseUser | null> = user(this.fireAuth); // the auth representation of the user
+  public user: User | null = null; // the information representation of the user
   public chats$: Observable<Chat[]> | undefined;
 
   public async userLogin(providerName: string = 'google.com'): Promise<void> {
     const provider = new OAuthProvider(providerName);
     const creds = await signInWithPopup(this.fireAuth, provider);
-    // user$ is now set (same as creds)
+    // authUser$ is now set (same as creds)
     const userDoc = await getDoc(doc(this.firestore, 'users', creds.user.uid));
     if (!userDoc.exists()) {
       // create user if they aren't in the db
       try {
+        const email = creds.user.email ?? "";
+        const username = (providerName === "google.com")
+                          ? email!.split('@')[0]
+                          : creds.user.displayName ?? "unnamed-githuber";
         const userValues: User = {
-          email: creds.user.email!,
+          email,
           photoURL: creds.user.photoURL!,
-          username: creds.user.email!.split('@')[0], // default to email
+          username,
           rooms: [],
           id: creds.user.uid,
         };
@@ -64,6 +71,7 @@ export class DbService {
         const userData = await getDoc(
           doc(this.firestore, 'users', creds.user.uid)
         );
+        this.user = userData.data() as User;
 
         try {
           await this.addUserToRoom(creds.user.uid, 'All_Users');
@@ -73,17 +81,14 @@ export class DbService {
             e
           );
         }
-        this.router.navigate(['']);
       } catch (error) {
-        console.error(error); // lazy
+        console.error("Something broke adding new user to db", error); // only slightly lazy
       }
     }
-    this.router.navigate(['/']); // send user back home
   }
 
   public async userLogout(): Promise<void> {
     await this.fireAuth.signOut();
-    this.router.navigate(['/login']);
   }
 
   public async updateUserInfo(userInfo: User): Promise<void> {
@@ -91,23 +96,32 @@ export class DbService {
   }
 
   constructor() {
-    this.user$.subscribe(async (firebaseUser) => {
+    this.authUser$.subscribe(async (firebaseUser) => {
       if (firebaseUser) {
         this.userDocumentRef = doc(this.firestore, 'users', firebaseUser.uid);
         const docData = await getDoc(this.userDocumentRef);
         if (docData.exists()) {
-          this.user = docData.data() as User;
-          this.user.id = firebaseUser.uid;
-          this.router.navigate(['']); // user logged in / is logged in, so let them through
+          this.user = docData.data() as User; // immediately set user info to kick off below actions
+          // given correct auth info, set up this.user to get updates from the db
+          // about respective user document
+          this.userSubscription$ = docSnapshots(this.userDocumentRef)
+            .pipe(takeWhile(unused => this.user != null)) // stop and close this observable when a user logs out
+            .subscribe(
+            (userSnapshot: DocumentSnapshot<User>) => {
+              this.user = userSnapshot.data() as User;
+            }
+          );
+          this.getRooms();
+          this.router.navigate(['']); // user logged in / is logged in, so automatically let them through
         }
-        this.getRooms();
       } else {
+        this.router.navigate(['/login']);
         this.user = null;
       }
     });
   }
 
-  private async getRooms() {
+  private async getRooms(): Promise<void> {
     if (!this.user)
       throw new Error('user undefined when trying to fetch rooms');
 
@@ -119,7 +133,7 @@ export class DbService {
     this.Rooms$ = collectionData(roomsQuery, { idField: 'id' });
   }
 
-  public async sendMessage(message: Chat, roomId: string) {
+  public async sendMessage(message: Chat, roomId: string): Promise<void> {
     if (!this.user) return;
 
     const chatsCollection = collection(
@@ -129,14 +143,14 @@ export class DbService {
     addDoc(chatsCollection, message);
   }
 
-  public async getChats(roomId: string) {
+  public async getChats(roomId: string): Promise<void> {
     if (!this.user) return;
 
     const chatsCollection = collection(
       this.firestore,
       'rooms/' + roomId + '/chats'
     );
-    const sortedQuery = query(chatsCollection, orderBy('timestamp', 'asc'));
+    const sortedQuery = query(chatsCollection, orderBy('timestamp', 'desc'));
     this.chats$ = collectionData(sortedQuery);
   }
 
@@ -300,6 +314,7 @@ export class DbService {
 
     updateDoc(userDocRef, { rooms: arrayRemove(roomDocRef) });
     updateDoc(roomDocRef, { users: arrayRemove(userDocRef) });
+    this.router.navigate(['']); // send user back home
   }
 
   async getProfilePicture(userId: string) {

@@ -17,15 +17,15 @@ export class SettingsComponent {
   public dbService = inject(DbService);
   public username: string = this.dbService.user!.username;
   public profilePicture: string = this.dbService.user!.photoURL;
-  public fontSize: number = localStorage['fontSize'] || 0;
-  public fontSizeOut = output<number>();
+  public chattingColor: string = localStorage['chattingColor'] || "#282a36";
+  public chattingColorOut = output<string>();
   public sideMenuCollapsed: boolean = true;
   public checkmark: boolean = false;
   public userToAdd: string = '';
   public alerts: Alert[] = [];
 
-  public updateFontSize(e: Event): void {
-    this.fontSizeOut.emit((e.target! as HTMLFormElement)['valueAsNumber']);
+  public updateChattingColor(e: Event): void {
+    this.chattingColorOut.emit((e.target! as HTMLFormElement)["value"]);
   }
 
   public async deleteRoom() {

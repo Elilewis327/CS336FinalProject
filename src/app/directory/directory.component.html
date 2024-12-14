@@ -1,12 +1,12 @@
 <div class="directory">
-  @for ( room of this.DbService.Rooms$ | async; track room;){
+  @for ( room of this.DbService.Rooms$ | async; track $index;){
   <app-room [data]="room" />
   }
   <div class="row">
     <div class="col">
       <div class="sideBarButton">
         <div class="card">
-          <a class="card-body fs-4" [routerLink]="['new-chat']">New Chat</a>
+          <a class="fs-4 btn btn-primary" [routerLink]="['new-chat']">New Chat</a>
         </div>
       </div>
     </div>
