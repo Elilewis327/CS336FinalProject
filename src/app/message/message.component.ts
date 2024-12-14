@@ -11,9 +11,9 @@ import { Timestamp } from '@angular/fire/firestore';
   styleUrl: './message.component.css',
 })
 export class MessageComponent {
-  DbService: DbService = inject(DbService);
+  public DbService: DbService = inject(DbService);
   @Input() data: Chat | undefined = undefined;
-  profilePicture: string = '';
+  public profilePicture: string = '';
 
   constructor() {
     effect(() => {
@@ -23,7 +23,7 @@ export class MessageComponent {
     });
   }
 
-  getTimestamp() {
+  public getTimestamp() {
     if (!this.data) return new Date(0);
 
     const ts = this.data.timestamp as Timestamp;

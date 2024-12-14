@@ -13,5 +13,5 @@ export const routes: Routes = [
     component: MessageViewerComponent,
     canActivate: [authGuard]
   },
-  { path: '**', redirectTo: 'chat/All_User' }, //redirect to all users chat by default
+  { path: '**', redirectTo: 'chat/All_Users' }, //redirect to all users chat by default
 ];

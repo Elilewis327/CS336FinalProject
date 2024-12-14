@@ -9,5 +9,5 @@ import { DbService } from '../db-service/db-service.service';
   styleUrl: './login-screen.component.css'
 })
 export class LoginScreenComponent {
-  DbService: DbService = inject(DbService);
+  public DbService: DbService = inject(DbService);
 }

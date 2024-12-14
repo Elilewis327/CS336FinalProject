@@ -11,12 +11,12 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './message-sender.component.css',
 })
 export class MessageSenderComponent {
-  DbService: DbService = inject(DbService);
-  message: string = '';
-  roomId = input("");
+  public DbService: DbService = inject(DbService);
+  public message: string = '';
+  public roomId = input("");
   
 
-  send() {
+  public send() {
     const message = {
       timestamp: serverTimestamp(),
       message: this.message,

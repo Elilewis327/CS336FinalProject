@@ -14,19 +14,19 @@ import { DirectoryComponent } from '../directory/directory.component';
 export class CreateChatComponent {
   public DbService: DbService = inject(DbService);
   
-  user: string = "";
-  alerts: Alert[] = [];
-  newRoom: Room = {name: '', users: []}
+  public user: string = "";
+  public alerts: Alert[] = [];
+  public newRoom: Room = {name: '', users: []}
 
   constructor () {
     this.addSelf();
   }
 
-  async addSelf(){
+  public async addSelf(){
     this.newRoom.users.push({username: this.DbService.user?.username, id: this.DbService.user?.id});
   }
 
-  async addUser(){
+  public async addUser(){
     this.user = this.user.trim();
     if (this.user === "") return;
 
@@ -50,7 +50,7 @@ export class CreateChatComponent {
     this.user = "";
   }
 
-  close(alert: Alert) {
+  public close(alert: Alert) {
 		this.alerts.splice(this.alerts.indexOf(alert), 1);
 	}
 

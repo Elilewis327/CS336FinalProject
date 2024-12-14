@@ -12,6 +12,6 @@ import { RouterLink } from '@angular/router';
   styleUrl: './directory.component.css'
 })
 export class DirectoryComponent {
-  DbService: DbService = inject(DbService);
+  public DbService: DbService = inject(DbService);
 
 }

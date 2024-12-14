@@ -64,19 +64,21 @@ export class DbService {
         const userData = await getDoc(
           doc(this.firestore, 'users', creds.user.uid)
         );
-        if (userData.exists()) console.log(userData.data());
 
         try {
-        await this.addUserToRoom(creds.user.uid, 'All_User');
-        } catch {
-          console.error("Something broke trying to add new user to All_User chat")
+          await this.addUserToRoom(creds.user.uid, 'All_Users');
+        } catch (e) {
+          console.error(
+            'Something broke trying to add new user to All_User chat',
+            e
+          );
         }
         this.router.navigate(['']);
       } catch (error) {
         console.error(error); // lazy
       }
     }
-    this.router.navigate(["/"]); // send user back home
+    this.router.navigate(['/']); // send user back home
   }
 
   public async userLogout(): Promise<void> {
@@ -85,7 +87,7 @@ export class DbService {
   }
 
   public async updateUserInfo(userInfo: User): Promise<void> {
-    await setDoc(doc(this.firestore, "users", this.user?.id!), userInfo);
+    await setDoc(doc(this.firestore, 'users', this.user?.id!), userInfo);
   }
 
   constructor() {
@@ -108,11 +110,6 @@ export class DbService {
   private async getRooms() {
     if (!this.user)
       throw new Error('user undefined when trying to fetch rooms');
-
-    if (!this.user.rooms || this.user.rooms.length <= 0) {
-      console.warn('no rooms found for the user!');
-      return;
-    }
 
     const roomsCollection = collection(this.firestore, 'rooms');
     const roomsQuery = query(
@@ -151,7 +148,9 @@ export class DbService {
 
     const usersCollection = collection(this.firestore, 'users');
     const userQuery = query(usersCollection, where('username', '==', keyword));
-    const possibleMatches: User[] = await firstValueFrom(collectionData(userQuery, { idField: 'id' })) as User[];
+    const possibleMatches: User[] = (await firstValueFrom(
+      collectionData(userQuery, { idField: 'id' })
+    )) as User[];
 
     // Check for a match and return the user ID if available
     if (possibleMatches.length > 0) {
@@ -160,8 +159,6 @@ export class DbService {
 
     return '';
   }
-
-
 
   public async createChatRoom(room: Room) {
     const roomsCollection = collection(this.firestore, 'rooms');
@@ -243,25 +240,25 @@ export class DbService {
 
     const userDoc = await getDoc(userDocRef);
     if (!userDoc.exists()) {
-      console.error("User not found");
+      console.error('User not found');
       throw new Error('User not found');
     }
 
     const roomDoc = await getDoc(roomDocRef);
     if (!roomDoc.exists()) {
-      console.error("Room not found");
+      console.error('Room not found');
       throw new Error('Room not found');
     }
 
     const users = (roomDoc.data() as Room).users;
     const username = (userDoc.data() as User).username;
 
-    users.forEach(ref => {
-      if (ref.id === userId){
-        throw new Error(`User ${username} is already here.`)
+    users.forEach((ref) => {
+      if (ref.id === userId) {
+        throw new Error(`User ${username} is already here.`);
       }
-    })
-    
+    });
+
     const joinedChat = {
       message: `${username} Joined The Room. Say Hi!`,
       timestamp: serverTimestamp(),
@@ -274,7 +271,7 @@ export class DbService {
     updateDoc(roomDocRef, { users: arrayUnion(userDocRef) });
   }
 
-  public async leaveRoom(roomId: string){
+  public async leaveRoom(roomId: string) {
     const roomDocRef = doc(this.firestore, 'rooms/' + roomId);
     const userDocRef = doc(this.firestore, 'users/' + this.user?.id);
 
@@ -287,7 +284,7 @@ export class DbService {
 
     const userDoc = await getDoc(userDocRef);
     if (!userDoc.exists()) {
-      console.error("User not found");
+      console.error('User not found');
       throw new Error('User not found');
     }
 
@@ -305,20 +302,16 @@ export class DbService {
     updateDoc(roomDocRef, { users: arrayRemove(userDocRef) });
   }
 
-
-  async getProfilePicture(userId: string){
+  async getProfilePicture(userId: string) {
     const userRef = doc(this.firestore, 'users/' + userId);
     const userDoc = await getDoc(userRef);
 
-    if(!userDoc.exists())
-      return '';
+    if (!userDoc.exists()) return '';
 
     const userData = userDoc.data() as User;
 
     return userData.photoURL;
-
   }
-
 }
 
 export interface Chat {
