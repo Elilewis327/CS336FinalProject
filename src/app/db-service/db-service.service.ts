@@ -186,12 +186,13 @@ export class DbService {
       const userDoc = await getDoc(ref);
       if (!userDoc.exists()) return; // how even lol, this should never happen
 
-      const username = (userDoc.data() as User).username;
+      const userData = userDoc.data() as User;
 
       const joinedChat = {
-        message: `${username} Joined The Room. Say Hi!`,
+        message: `${userData.username} Joined The Room. Say Hi!`,
         timestamp: serverTimestamp(),
-        username: username,
+        username: userData.username,
+        userId: userDoc.id,
       } as Chat;
 
       updateDoc(ref, {
@@ -265,6 +266,7 @@ export class DbService {
       message: `${username} Joined The Room. Say Hi!`,
       timestamp: serverTimestamp(),
       username: username,
+      userId: userId,
     } as Chat;
     addDoc(chatsCollection, joinedChat);
 
@@ -289,17 +291,32 @@ export class DbService {
       throw new Error('User not found');
     }
 
-    const username = (userDoc.data() as User).username;
+    const userData = userDoc.data() as User;
 
     const joinedChat = {
-      message: `${username} Left The Room. 😞`,
+      message: `${userData.username} Left The Room. 😞`,
       timestamp: serverTimestamp(),
-      username: username,
+      username: userData.username,
+      userId: userDoc.id,
     } as Chat;
     addDoc(chatsCollection, joinedChat);
 
     updateDoc(userDocRef, { rooms: arrayRemove(roomDocRef) });
     updateDoc(roomDocRef, { users: arrayRemove(userDocRef) });
+  }
+
+
+  async getProfilePicture(userId: string){
+    const userRef = doc(this.firestore, 'users/' + userId);
+    const userDoc = await getDoc(userRef);
+
+    if(!userDoc.exists())
+      return '';
+
+    const userData = userDoc.data() as User;
+
+    return userData.photoURL;
+
   }
 
 }
@@ -308,6 +325,7 @@ export interface Chat {
   message: string;
   timestamp: Timestamp | FieldValue;
   username: string;
+  userId: string;
 }
 
 export interface User {

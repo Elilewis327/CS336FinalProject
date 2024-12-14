@@ -1,7 +1,18 @@
 @if( this.data != undefined){
-<div class="message">
-  <div class="card">
-    <div class="card-body fs-4">{{ this.data.message }}</div>
+<div class="message" style="max-width: 540px">
+  <div class="card mb-3">
+    <div class="row">
+      <div class="col-md-4">
+        <img
+          class="img-thumbnail img-fluid rounded-start"
+          style="max-height: 70px; object-fit: fill;"
+          src="{{ profilePicture }}"
+        />
+      </div>
+      <div class="col-md-8">
+        <div class="card-body fs-4">{{ this.data.message }}</div>
+      </div>
+    </div>
   </div>
   <span> {{ this.data.username }}</span> at
   {{ this.getTimestamp() | date : "medium" }}

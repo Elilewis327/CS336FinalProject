@@ -21,8 +21,10 @@ export class MessageSenderComponent {
       timestamp: serverTimestamp(),
       message: this.message,
       username: this.DbService.user?.username,
+      userId: this.DbService.user?.id,
     };
 
     this.DbService.sendMessage(message as Chat, this.roomId() as string);
+    this.message = '';
   }
 }
