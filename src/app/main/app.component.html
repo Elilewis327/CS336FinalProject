@@ -1,17 +1,40 @@
 <main class="container-fluid">
+  @if(DbService.user != null) { @if(this.screenWidth > 1200){
   <div class="row">
-    @if(DbService.user != null) {
     <div class="col-3">
       <app-directory />
     </div>
     <div class="col-9">
       <router-outlet />
     </div>
+  </div>
+  } @else {
+  <div class="row">
+    <span style="padding: 10px"
+      ><button
+        (click)="navCollapsed = !navCollapsed"
+        type="button"
+        class="btn btn-primary col-3"
+      >
+        Navigate
+      </button></span
+    >
+  </div>
+  <div class="row">
+    @if(!navCollapsed){
+    <div class="col-12">
+      <app-directory />
+    </div>
     }
-    @else { <!-- Login page. yes this is lazy. yes it looks better with ease. -->
+
     <div class="col-12">
       <router-outlet />
     </div>
-    }
+
   </div>
+
+  } } @else {
+  <!-- Login page. yes this is lazy. yes it looks better with ease. -->
+  <router-outlet />
+  }
 </main>
