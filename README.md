@@ -1,7 +1,7 @@
 # Welcome to the CS336FinalProject wiki!
 
 ## Pages
-[Project Link 🔗](https://chatapp-c40e9.web.app/chat/All_Users)
+[Project Link 🔗](https://chatapp-c40e9.web.app)
 
 [Design 👨‍💻](https://github.com/Elilewis327/CS336FinalProject/wiki/Design)
 
