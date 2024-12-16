@@ -4,6 +4,5 @@
   padding: 5px;
   border-radius: 5px;
   border-width: 2px;
-  height: 200px;
-  width: 540px;
+  max-width: 540px;
 }
