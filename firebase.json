@@ -1,0 +1,10 @@
+{
+  "hosting": {
+    "public": "dist/cs336-final-project/browser",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}
